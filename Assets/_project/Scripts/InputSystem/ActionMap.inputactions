@@ -1,0 +1,34 @@
+{
+    "name": "ActionMap",
+    "maps": [
+        {
+            "name": "Mouse",
+            "id": "b27782ce-ed80-4b74-b499-bae8e8b8e8f8",
+            "actions": [
+                {
+                    "name": "LongClick",
+                    "type": "Button",
+                    "id": "210729e2-236c-427e-9f33-072d27cd1773",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8fe695df-ed38-4312-b890-1ea7d78e2aa0",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LongClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
