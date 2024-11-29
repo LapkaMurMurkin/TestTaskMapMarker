@@ -1,13 +1,17 @@
 using System.IO;
 using DG.Tweening;
+using SFB;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PinInfoEditor : MonoBehaviour
+public class PinInfoEditor : UIElement
 {
     private Pin _pin;
+
+    private Map _map;
+    private PinScroller _pinScroller;
 
     [SerializeField]
     private TMP_InputField PlaceName;
@@ -25,18 +29,25 @@ public class PinInfoEditor : MonoBehaviour
     [SerializeField]
     private Button DeletePinButton;
 
-    private RectTransform _rectTransform;
-    private CanvasGroup _canvasGroup;
-
-    public void Initialize()
+    public override void Initialize()
     {
-        _rectTransform = GetComponent<RectTransform>();
-        _canvasGroup = GetComponent<CanvasGroup>();
+        base.Initialize();
 
         LoadPhotoButton.onClick.AddListener(LoadPhoto);
         SavePinButton.onClick.AddListener(SavePin);
         CancelButton.onClick.AddListener(CancelEditing);
         DeletePinButton.onClick.AddListener(() => DeletePin(_pin));
+
+        _map = ServiceLocator.Get<Map>();
+        _pinScroller = ServiceLocator.Get<PinScroller>();
+
+        _map.Clicked += CreatePin;
+    }
+
+    private void Destroy()
+    {
+        _map.Clicked -= CreatePin;
+        Debug.Log("Destroy");
     }
 
     public void OpenEditor(Pin pin)
@@ -48,7 +59,7 @@ public class PinInfoEditor : MonoBehaviour
         Photo.texture = pin.Info.Photo;
 
         gameObject.SetActive(true);
-        DoFaidInAnimation();
+        DoPopupAnimation();
     }
 
     public void CloseEditor()
@@ -56,26 +67,24 @@ public class PinInfoEditor : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void DoFaidInAnimation()
-    {
-        float fadeTime = 0.2f;
-        Vector3 origScale = _rectTransform.localScale;
-        _canvasGroup.alpha = 0f;
-        _rectTransform.localScale = new Vector3(0, 0, 0f);
-        _rectTransform.DOScale(origScale, fadeTime);
-        _canvasGroup.DOFade(1, fadeTime);
-    }
-
     private void LoadPhoto()
     {
-        string path = EditorUtility.OpenFilePanel("Select Image", "", "png");
+        ExtensionFilter[] extensions = new[] {
+            new ExtensionFilter("Image Files", "png", "jpg", "jpeg" ),
+        };
+        string[] result = StandaloneFileBrowser.OpenFilePanel("Select Image", "", extensions, false);
 
-        if (path.Length is not 0)
+        if (result.Length is not 0)
         {
-            byte[] fileContent = File.ReadAllBytes(path);
-            Texture2D texture = new Texture2D(2, 2);
-            ImageConversion.LoadImage(texture, fileContent);
-            Photo.texture = texture;
+            string path = result[0];
+
+            if (path.Length is not 0)
+            {
+                byte[] fileContent = File.ReadAllBytes(path);
+                Texture2D texture = new Texture2D(2, 2);
+                ImageConversion.LoadImage(texture, fileContent);
+                Photo.texture = texture;
+            }
         }
     }
 
@@ -86,10 +95,10 @@ public class PinInfoEditor : MonoBehaviour
         pinInfo.Description = Description.text;
         pinInfo.Photo = Photo.texture as Texture2D;
         pinInfo.Coords = _pin.Info.Coords;
+
         _pin.UpdatePinInfo(pinInfo);
-
-        ServiceLocator.Get<PinScroller>().UpdateItem(_pin);
-
+        _pinScroller.UpdateItem(_pin);
+        
         CloseEditor();
     }
 
@@ -98,10 +107,16 @@ public class PinInfoEditor : MonoBehaviour
         CloseEditor();
     }
 
+    public void CreatePin(Vector2 coords)
+    {
+        Pin pin = ServiceLocator.Get<Map>().CreatePin(coords);
+        ServiceLocator.Get<PinScroller>().AddItem(pin);
+    }
+
     public void DeletePin(Pin pin)
     {
+        ServiceLocator.Get<Map>().DeletePin(pin);
         ServiceLocator.Get<PinScroller>().DeleteItem(pin);
-        Destroy(pin.gameObject);
         CancelEditing();
     }
 }

@@ -1,8 +1,4 @@
-using System;
-using TMPro;
-using UnityEditor.Profiling;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PinInfo
 {
@@ -19,3 +15,4 @@ public class PinInfo
         Coords = Vector2.zero;
     }
 }
+// 

@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PinInfoExpand : MonoBehaviour
+public class PinInfoExpand : UIElement
 {
     private Pin _pin;
 
@@ -16,14 +16,10 @@ public class PinInfoExpand : MonoBehaviour
     [SerializeField]
     private Button CloseButton;
 
-    private RectTransform _rectTransform;
-    private CanvasGroup _canvasGroup;
-
-    public void Initialize()
+    public override void Initialize()
     {
-        _rectTransform = GetComponent<RectTransform>();
-        _canvasGroup = GetComponent<CanvasGroup>();
-
+        base.Initialize();
+        
         CloseButton.onClick.AddListener(CloseExpandInfo);
     }
 
@@ -36,21 +32,11 @@ public class PinInfoExpand : MonoBehaviour
         Photo.texture = pin.Info.Photo;
 
         gameObject.SetActive(true);
-        DoFaidInAnimation();
+        DoPopupAnimation();
     }
 
     public void CloseExpandInfo()
     {
         gameObject.SetActive(false);
-    }
-
-    private void DoFaidInAnimation()
-    {
-        float fadeTime = 0.2f;
-        Vector3 origScale = _rectTransform.localScale;
-        _canvasGroup.alpha = 0f;
-        _rectTransform.localScale = new Vector3(0, 0, 0f);
-        _rectTransform.DOScale(origScale, fadeTime);
-        _canvasGroup.DOFade(1, fadeTime);
     }
 }

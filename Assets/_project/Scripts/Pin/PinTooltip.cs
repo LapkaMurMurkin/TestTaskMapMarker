@@ -1,16 +1,12 @@
 using DG.Tweening;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class PinTooltip : MonoBehaviour, IPointerExitHandler
+public class PinTooltip : UIElement, IPointerExitHandler
 {
     private Pin _pin;
-
-    private RectTransform _rectTransform;
-    private CanvasGroup _canvasGroup;
 
     [SerializeField]
     private TextMeshProUGUI _placeName;
@@ -21,10 +17,9 @@ public class PinTooltip : MonoBehaviour, IPointerExitHandler
     [SerializeField]
     private Button EditButton;
 
-    public void Initialize()
+    public override void Initialize()
     {
-        _rectTransform = GetComponent<RectTransform>();
-        _canvasGroup = GetComponent<CanvasGroup>();
+        base.Initialize();
 
         EditButton.onClick.AddListener(Edit);
         ExpandButton.onClick.AddListener(Expand);
@@ -34,7 +29,6 @@ public class PinTooltip : MonoBehaviour, IPointerExitHandler
     {
         _pin = pin;
 
-        //Vector2 position = Camera.main.ScreenToWorldPoint(pin.transform.position);
         transform.position = pin.transform.position;
 
         _placeName.text = pin.Info.PlaceName;
@@ -45,22 +39,12 @@ public class PinTooltip : MonoBehaviour, IPointerExitHandler
             _description.text = pin.Info.Description;
 
         gameObject.SetActive(true);
-        DoFaidInAnimation();
+        DoPopupAnimation();
     }
 
     public void Hide()
     {
         gameObject.SetActive(false);
-    }
-
-    private void DoFaidInAnimation()
-    {
-        float fadeTime = 0.2f;
-        Vector3 origScale = _rectTransform.localScale;
-        _canvasGroup.alpha = 0f;
-        _rectTransform.localScale = new Vector3(0, 0, 0f);
-        _rectTransform.DOScale(origScale, fadeTime);
-        _canvasGroup.DOFade(1, fadeTime);
     }
 
     public void OnPointerExit(PointerEventData eventData)

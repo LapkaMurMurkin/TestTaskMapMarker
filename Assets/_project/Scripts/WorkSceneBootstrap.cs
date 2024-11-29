@@ -1,14 +1,10 @@
-using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class WorkSceneBootstrap : MonoBehaviour
 {
     public static ServiceLocator ServiceLocator = new ServiceLocator();
 
-    //private ActionMap _actionMap;
-
-    private PinInfo _pinInfoTemplate;
     private PinTooltip _pinTooltip;
     private PinInfoExpand _pinInfoExpand;
     private PinInfoEditor _pinInfoEditor;
@@ -23,10 +19,6 @@ public class WorkSceneBootstrap : MonoBehaviour
     {
         ServiceLocator = new ServiceLocator();
 
-        /* _actionMap = new ActionMap();
-        _actionMap.Enable();
-        ServiceLocator.Register<ActionMap>(_actionMap); */
-
         _pinTooltip = FindAnyObjectByType<PinTooltip>(FindObjectsInactive.Include);
         _pinTooltip.Initialize();
         ServiceLocator.Register<PinTooltip>(_pinTooltip);
@@ -35,20 +27,21 @@ public class WorkSceneBootstrap : MonoBehaviour
         _pinInfoExpand.Initialize();
         ServiceLocator.Register<PinInfoExpand>(_pinInfoExpand);
 
-        _pinInfoEditor = FindAnyObjectByType<PinInfoEditor>(FindObjectsInactive.Include);
-        _pinInfoEditor.Initialize();
-        ServiceLocator.Register<PinInfoEditor>(_pinInfoEditor);
-
-        _pinInfoScroller = FindAnyObjectByType<PinScroller>(FindObjectsInactive.Include);
-        _pinInfoScroller.Initialize();
-        ServiceLocator.Register<PinScroller>(_pinInfoScroller);
-
+        //Loading
         _applicationDataStorageAgent = new ApplicationDataStorageAgent();
         _applicationData = _applicationDataStorageAgent.Load();
 
         _map = FindAnyObjectByType<Map>(FindObjectsInactive.Include);
-        _map.Initialize(_applicationData.pinInfos);
+        List<Pin> pins = _map.Initialize(_applicationData.pinInfos);
         ServiceLocator.Register<Map>(_map);
+
+        _pinInfoScroller = FindAnyObjectByType<PinScroller>(FindObjectsInactive.Include);
+        _pinInfoScroller.Initialize(pins);
+        ServiceLocator.Register<PinScroller>(_pinInfoScroller);
+
+        _pinInfoEditor = FindAnyObjectByType<PinInfoEditor>(FindObjectsInactive.Include);
+        _pinInfoEditor.Initialize();
+        ServiceLocator.Register<PinInfoEditor>(_pinInfoEditor);
     }
 
     private void OnApplicationQuit()

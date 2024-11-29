@@ -1,31 +1,38 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Map : MonoBehaviour, IPointerClickHandler
+public class Map : UIElement, IPointerClickHandler
 {
-    private RectTransform _rectTransform;
-
     [SerializeField]
     private GameObject _pinPrefab;
 
-    public void Initialize(List<PinInfo> pinInfos)
+    public Action<Vector2> Clicked;
+
+    public List<Pin> Initialize(List<PinInfo> pinInfos)
     {
-        _rectTransform = GetComponent<RectTransform>();
+        base.Initialize();  
+
+        List<Pin> pins = new List<Pin>();
 
         foreach (PinInfo pinInfo in pinInfos)
         {
             Pin pin = CreatePin(pinInfo.Coords);
             pin.UpdatePinInfo(pinInfo);
-            ServiceLocator.Get<PinScroller>().UpdateItem(pin);
+            pins.Add(pin);
+            //ServiceLocator.Get<PinScroller>().UpdateItem(pin);
         }
+
+        return pins;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         Vector2 coords;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, eventData.position, eventData.pressEventCamera, out coords);
-        CreatePin(coords);
+        Clicked?.Invoke(coords);
+        //CreatePin(coords);
     }
 
     public Pin CreatePin(Vector2 coords)
@@ -34,8 +41,11 @@ public class Map : MonoBehaviour, IPointerClickHandler
         Pin pinComponent = pinObject.GetComponent<Pin>();
         pinComponent.Initialize(coords);
 
-        ServiceLocator.Get<PinScroller>().AddItem(pinComponent);
-
         return pinComponent;
+    }
+
+    public void DeletePin(Pin pin)
+    {
+        Destroy(pin.gameObject);
     }
 }
